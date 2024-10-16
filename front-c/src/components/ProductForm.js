@@ -1,13 +1,30 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import axios from 'axios';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const ProductForm = () =>{
     const [productos, setProductos] = useState([]);
-    const [codigo, setCodigo] = useState([]);
-    const [nombreProducto, setNombreProducto] = useState([]);
-    const [categoria, setCategoria] = useState([]);
-    const [proveedor, setProveedor] = useState([]);
-    const [descripcion, setDescripcion] = useState([]);
-    const [cantidad, setCantidad] = useState([]);
+    const [codigo, setCodigo] = useState('');
+    const [nombreProducto, setNombreProducto] = useState('');
+    const [categoria, setCategoria] = useState('');
+    const [proveedor, setProveedor] = useState('');
+    const [descripcion, setDescripcion] = useState('')
+    const [cantidad, setCantidad] = useState('');
+    const [categorias, setCategorias] = useState([]);
+    const [proveedores, setProveedores] = useState([]);
+
+    //Funcion para obtener categorias
+    useEffect(()=>{
+        const obtenerCategorias = async ()=>{
+            try {
+                const response = await axios.get('http://localhost:9003/api/categorias');
+                setCategorias(response.nombreCategoria);
+            }catch(error){
+                console.error('Error al cargar las categorias: ', error);
+            }
+        };
+        obtenerCategorias();
+    },[]);
 
     const handleProduct = () => {
         const newProducto = {
@@ -23,8 +40,9 @@ const ProductForm = () =>{
 
     return (
         <div className="container">
-            <h3>Productos</h3>
-            <div className="mb-3">
+            <div className="row">
+                <div className="col">
+                <h3>Productos</h3>
                 <input
                     type="text"
                     value={codigo}
@@ -39,13 +57,19 @@ const ProductForm = () =>{
                     placeholder="Nombre del producto"
                     className="form-control mb-2"
                 />
-                <input
-                    type="text"
+                <select
                     value={categoria}
                     onChange={(e) => setCategoria(e.target.value)}
-                    placeholder="Categoria"
-                    className="form-control mb-2"
-                />
+                    className="form-select mb-2"
+                >
+                    <option value="">Selecciona una Categoria</option>
+                    {categorias.map((cat) => (
+                        <option key={cat.idCategoria} value={cat.idCategoria}>
+                            {cat.nombreCategoria}
+                        </option>
+                    ))}
+
+                </select>
                 <input
                     type="text"
                     value={proveedor}
@@ -67,8 +91,20 @@ const ProductForm = () =>{
                     placeholder="Cantidad de productos"
                     className="form-control mb-2"
                 />
+                <button onClick={handleProduct} className="btn btn-primary">Agregar Producto</button>
+                </div>
+
+                <div className="col">
+                    <h3>Vincular proveedor con producto</h3>
+                    <select 
+                    className="form-select mb-2"
+                    />
+                    <select
+                    className="form-select mb-2"
+                    />
+                    <button className="btn btn-primary">Vincular producto con proveedor</button>
+                </div>
             </div>
-            <button onClick={handleProduct} className="btn btn-primary">Agregar Producto</button>
 
             <h4 className="mt*4">Productos</h4>
             <table className="table table-striped mt-2">
@@ -80,6 +116,7 @@ const ProductForm = () =>{
                     <th>Proveedor</th>
                     <th>Descripcion</th>
                     <th>Cantidad</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
